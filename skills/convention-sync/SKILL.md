@@ -118,6 +118,8 @@ cd docs/convention && shasum -a 256 -c .convention-sha256 --quiet
 | `common/tooling/pull_request_template.md` | `.github/pull_request_template.md` | 모든 프로젝트 |
 | `backend/kotlin/tooling/.editorconfig` | 프로젝트 루트 `.editorconfig` | 백엔드 Kotlin |
 | `backend/kotlin/tooling/detekt.yml` | `config/detekt/detekt.yml` | 백엔드 Kotlin |
+| `frontend/typescript/tooling/eslint.config.mjs` | 프로젝트 루트 `eslint.config.mjs` | 프론트엔드 TypeScript |
+| `frontend/typescript/tooling/.prettierrc.json` | 프로젝트 루트 `.prettierrc.json` | 프론트엔드 TypeScript |
 
 - 설치 위치에 파일이 이미 있고 내용이 다르면, 덮어쓰지 않고 diff를 보여준 뒤 묻는다.
 - Gradle 설정은 파일로 설치하지 않는다. `tooling/README.md`의 예시를 안내만 한다.
