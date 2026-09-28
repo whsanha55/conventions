@@ -1,11 +1,16 @@
 ---
 name: convention-sync
-description: 개인 코드 컨벤션(github.com/whsanha55/conventions)을 현재 프로젝트의 docs/convention/으로 가져오거나 최신화한다. README와 CLAUDE.md에 안내를 넣고, 다시 실행하면 원본 최신 커밋과 비교해 갱신한다. 사용자가 "/convention-sync"를 호출하거나 "컨벤션 가져와줘", "컨벤션 동기화", "컨벤션 최신화"처럼 명시적으로 요청할 때만 사용한다. 평소 코드 작성 중에는 호출하지 않는다 — 그때는 프로젝트의 docs/convention/을 읽는다.
+description: 개인 코드 컨벤션(github.com/whsanha55/conventions)을 현재 프로젝트의 docs/convention/으로 가져오거나 최신화하고, 컨벤션 변경은 원본 저장소에 PR로 제안한다. 동기화는 README와 CLAUDE.md에 안내를 넣고, 다시 실행하면 원본 최신 커밋과 비교해 갱신한다. 사용자가 "/convention-sync"(동기화), "/convention-sync propose"(변경 제안)를 호출하거나 "컨벤션 가져와줘", "컨벤션 동기화", "컨벤션 최신화", "컨벤션 수정 제안", "컨벤션에 이 규칙 추가하자"처럼 명시적으로 요청할 때만 사용한다. 평소 코드 작성 중에는 호출하지 않는다 — 그때는 프로젝트의 docs/convention/을 읽는다.
 ---
 
 # convention-sync
 
-원본 저장소의 컨벤션을 현재 프로젝트에 복사하고, 이후 최신 상태로 유지한다.
+원본 저장소의 컨벤션을 현재 프로젝트에 복사하고, 이후 최신 상태로 유지한다. 컨벤션 자체를 바꿀 때는 원본 저장소에 PR을 올린다.
+
+| 모드 | 호출 | 하는 일 |
+|---|---|---|
+| 동기화 (기본) | `/convention-sync` | 원본을 `docs/convention/`에 복사, 최신화 |
+| 변경 제안 | `/convention-sync propose` | 원본 저장소에 브랜치를 만들고 PR을 올림 |
 
 - 원본: `https://github.com/whsanha55/conventions` (public, `main` 브랜치)
 - 설치 위치: 프로젝트 루트의 `docs/convention/`
@@ -25,7 +30,7 @@ docs/convention/
 └── .convention-sha256      # 설치한 파일의 해시 (로컬 수정 감지용)
 ```
 
-## 절차
+## 동기화 절차
 
 ### 1. 프로젝트 종류 판단
 
@@ -73,7 +78,7 @@ cd docs/convention && shasum -a 256 -c .convention-sha256 --quiet
 해시가 다른 파일은 누군가 직접 고친 것이다. 덮어쓰기 전에 파일마다 로컬 내용과 원본 최신 내용의 diff를 보여주고 묻는다.
 
 - 덮어쓰기: 원본으로 교체한다.
-- 유지: 그 파일은 건너뛴다. 프로젝트 예외라면 `LOCAL.md`로 옮기라고 제안한다.
+- 유지: 그 파일은 건너뛴다. 프로젝트 예외라면 `LOCAL.md`로 옮기고, 모든 프로젝트에 필요한 변경이라면 변경 제안(PR)을 제안한다.
 
 ### 5. 파일 복사
 
@@ -123,6 +128,7 @@ CLAUDE.md:
 
 코드를 작성하거나 리뷰하기 전에 `docs/convention/`에서 관련 문서와 `LOCAL.md`를 읽고 따른다. `LOCAL.md`가 우선한다.
 `docs/convention/`의 파일은 `LOCAL.md`를 제외하고 직접 수정하지 않는다. 갱신은 `/convention-sync`로만 한다.
+컨벤션 자체를 바꿔야 하면 `/convention-sync propose`로 원본 저장소에 PR을 올린다.
 <!-- convention:end -->
 ```
 
@@ -151,3 +157,47 @@ EOF
 - `rm -rf "$TMP"`
 - 추가, 변경, 삭제, 건너뛴 파일과 새 SHA를 보고한다.
 - 커밋 메시지를 제안한다: `docs: 컨벤션 동기화 (<short sha>)`
+
+## 변경 제안 절차 (propose)
+
+프로젝트에서 작업하다 컨벤션 자체를 바꿔야 할 때 쓴다. 원본 저장소의 `main`에는 직접 push하지 않는다 (브랜치 보호 규칙으로 막혀 있다).
+
+### 1. 변경 내용 확정
+
+- 무엇을, 왜 바꾸는지 사용자와 확정한다. 한 PR에는 하나의 주제만 담는다.
+- 이 프로젝트에만 필요한 예외라면 PR 대신 `docs/convention/LOCAL.md`에 적도록 안내하고 끝낸다.
+
+### 2. 브랜치 생성
+
+로컬 원본 작업 폴더를 건드리지 않도록 임시 폴더에서 작업한다.
+
+```bash
+TMP=$(mktemp -d)
+gh repo clone whsanha55/conventions "$TMP/conventions" -- --quiet
+cd "$TMP/conventions"
+git switch -c docs/{설명}      # 소문자, 하이픈
+```
+
+### 3. 수정과 커밋
+
+- 원본 저장소의 `CLAUDE.md`와 `README.md`의 구조 규칙을 따른다.
+- 문서는 핵심 규칙 위주로 짧게 쓴다.
+- 커밋 메시지는 `docs: {한글 제목}` 형식이다 (이 저장소는 티켓 번호를 쓰지 않는다).
+
+### 4. PR 생성
+
+```bash
+git push -u origin HEAD
+gh pr create --base main --title "docs: {한글 제목}" --body "..."
+```
+
+PR 본문에 다음을 적는다.
+
+- 변경 내용 요약
+- 계기: 어느 프로젝트의 어떤 상황에서 필요했는지
+- 영향: 기존 규칙과 충돌하거나 프로젝트 코드 수정이 필요한지
+
+### 5. 보고
+
+- PR 링크를 보고하고 `rm -rf "$TMP"`로 정리한다.
+- 현재 프로젝트의 `docs/convention/`은 수정하지 않는다. PR이 병합된 뒤 `/convention-sync`로 반영하라고 안내한다.
