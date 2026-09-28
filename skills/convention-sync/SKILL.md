@@ -16,6 +16,21 @@ description: 개인 코드 컨벤션(github.com/whsanha55/conventions)을 현재
 - 설치 위치: 프로젝트 루트의 `docs/convention/`
 - 파일을 바꾸기만 하고 커밋하지 않는다.
 
+## 시작 전: 스킬 최신화 (모든 모드)
+
+이 스킬 파일은 로컬 원본 저장소(`~/temp/personal/conventions`)를 심볼릭 링크로 읽는다. 원격에 병합된 스킬 변경을 반영하려고 매번 먼저 pull 한다.
+
+```bash
+LOCAL=~/temp/personal/conventions
+BEFORE=$(git -C "$LOCAL" rev-parse HEAD:skills/convention-sync/SKILL.md)
+git -C "$LOCAL" pull --ff-only --quiet
+AFTER=$(git -C "$LOCAL" rev-parse HEAD:skills/convention-sync/SKILL.md)
+```
+
+- 로컬이 `main`이 아니거나 커밋하지 않은 변경이 있으면 pull 하지 않는다. 그 사실만 알리고 현재 스킬로 진행한다.
+- pull이 fast-forward로 안 되면 멈추고 사용자에게 알린다.
+- `BEFORE`와 `AFTER`가 다르면 이 파일(`SKILL.md`)을 다시 읽고 새 절차대로 진행한다.
+
 ## 설치 결과
 
 ```text
