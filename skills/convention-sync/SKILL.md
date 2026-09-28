@@ -109,14 +109,15 @@ cd docs/convention && shasum -a 256 -c .convention-sha256 --quiet
 (없음)
 ```
 
-### 6. 도구 설정 (백엔드 Kotlin)
+### 6. 도구 설정
 
-`backend/kotlin/tooling/`의 설정을 프로젝트에 설치할지 묻는다. 최초 설치 때, 또는 원본의 설정 파일이 바뀌었을 때만 묻는다.
+대상 경로의 `tooling/` 설정을 프로젝트에 설치할지 묻는다. 최초 설치 때, 또는 원본의 설정 파일이 바뀌었을 때만 묻는다.
 
-| 원본 | 설치 위치 |
-|---|---|
-| `tooling/.editorconfig` | 프로젝트 루트 `.editorconfig` |
-| `tooling/detekt.yml` | `config/detekt/detekt.yml` |
+| 원본 | 설치 위치 | 대상 |
+|---|---|---|
+| `common/tooling/pull_request_template.md` | `.github/pull_request_template.md` | 모든 프로젝트 |
+| `backend/kotlin/tooling/.editorconfig` | 프로젝트 루트 `.editorconfig` | 백엔드 Kotlin |
+| `backend/kotlin/tooling/detekt.yml` | `config/detekt/detekt.yml` | 백엔드 Kotlin |
 
 - 설치 위치에 파일이 이미 있고 내용이 다르면, 덮어쓰지 않고 diff를 보여준 뒤 묻는다.
 - Gradle 설정은 파일로 설치하지 않는다. `tooling/README.md`의 예시를 안내만 한다.
@@ -171,7 +172,7 @@ EOF
 
 - `rm -rf "$TMP"`
 - 추가, 변경, 삭제, 건너뛴 파일과 새 SHA를 보고한다.
-- 커밋 메시지를 제안한다: `docs: 컨벤션 동기화 (<short sha>)`
+- 커밋 메시지를 제안한다: `docs: 컨벤션 동기화 (<short sha>)` (`Co-Authored-By` 트레일러 없이)
 
 ## 변경 제안 절차 (propose)
 
@@ -198,6 +199,7 @@ git switch -c docs/{설명}      # 소문자, 하이픈
 - 원본 저장소의 `CLAUDE.md`와 `README.md`의 구조 규칙을 따른다.
 - 문서는 핵심 규칙 위주로 짧게 쓴다.
 - 커밋 메시지는 `docs: {한글 제목}` 형식이다 (이 저장소는 티켓 번호를 쓰지 않는다).
+- 커밋에 `Co-Authored-By` 트레일러를 넣지 않는다.
 
 ### 4. PR 생성
 
@@ -206,10 +208,11 @@ git push -u origin HEAD
 gh pr create --base main --title "docs: {한글 제목}" --body "..."
 ```
 
-PR 본문에 다음을 적는다.
+PR 본문은 `common/tooling/pull_request_template.md` 양식을 따른다. "Generated with Claude Code" 등 도구 문구는 넣지 않는다.
 
-- 변경 내용 요약
-- 계기: 어느 프로젝트의 어떤 상황에서 필요했는지
+- 변경 내용: 변경 요약
+- 이유: 어느 프로젝트의 어떤 상황에서 필요했는지
+- 확인 방법: 문서 변경이면 "문서 변경만"
 - 영향: 기존 규칙과 충돌하거나 프로젝트 코드 수정이 필요한지
 
 ### 5. 보고
