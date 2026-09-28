@@ -126,15 +126,45 @@ class OrderEntity(
 }
 ```
 
-`createdAt`, `updatedAt` 같은 감사(auditing) 필드도 `Clock` 기준으로 채운다.
+### 감사 필드 (`createdAt`, `updatedAt`)
+
+- DB가 채운다. 애플리케이션 코드와 쿼리에서 값을 넣거나 바꾸지 않는다. 벌크 업데이트 쿼리도 마찬가지다.
+- JPA Auditing(`@CreatedDate`, `@LastModifiedDate`)을 쓰지 않는다.
+- 비즈니스 로직에서 감사 필드를 쓰지 않는다. 업무상 시각이 필요하면 `orderedAt`처럼 별도 필드를 두고 `Clock`으로 채운다.
 
 ```kotlin
-@EnableJpaAuditing(dateTimeProviderRef = "auditingDateTimeProvider")
-@Configuration
-class JpaConfig {
-    @Bean
-    fun auditingDateTimeProvider(clock: Clock) = DateTimeProvider { Optional.of(Instant.now(clock)) }
+@MappedSuperclass
+abstract class BaseEntity {
+    // 쓰기에서 제외하고, INSERT/UPDATE 후 DB 값을 다시 읽는다
+    @Generated(event = [EventType.INSERT])
+    @Column(nullable = false)
+    var createdAt: Instant? = null
+        protected set
+
+    @Generated(event = [EventType.INSERT, EventType.UPDATE])
+    @Column(nullable = false)
+    var updatedAt: Instant? = null
+        protected set
 }
+```
+
+DDL:
+
+```sql
+-- MySQL (세션 타임존 UTC 설정 필요, 7절)
+created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+
+-- PostgreSQL (ON UPDATE가 없으므로 트리거를 쓴다)
+created_at timestamptz NOT NULL DEFAULT now(),
+updated_at timestamptz NOT NULL DEFAULT now()
+
+CREATE FUNCTION set_updated_at() RETURNS trigger AS $$
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER orders_set_updated_at BEFORE UPDATE ON orders
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 ```
 
 ## 5. 트랜잭션
