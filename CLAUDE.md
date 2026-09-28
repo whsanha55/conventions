@@ -7,6 +7,8 @@
 - `main`에 직접 push하지 않는다. 브랜치 보호 규칙으로 막혀 있다.
 - `docs/{설명}` 브랜치에서 작업하고 PR을 올린다. 병합은 사용자가 PR에서 diff를 검토한 뒤 직접 한다.
 - 커밋 메시지는 `docs: {한글 제목}` 형식이다. 이 저장소는 티켓 번호를 쓰지 않는다.
+- 커밋에 `Co-Authored-By` 트레일러를, PR 본문에 "Generated with Claude Code" 등 도구 문구를 절대 넣지 않는다.
+- PR 본문은 `common/tooling/pull_request_template.md` 양식을 따르고, squash 병합한다.
 - 한 PR에는 하나의 주제만 담는다.
 
 ## 작성 원칙
